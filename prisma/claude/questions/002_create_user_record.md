@@ -34,7 +34,7 @@ Prisma Clientを使用して、新しいUserレコードをデータベースに
 
 ```bash
 # コンテナに接続
-docker-compose exec prisma-app bash
+docker-compose exec prisma-app sh
 
 # プログラム実行
 npx ts-node workspace/problems/problem-002.ts

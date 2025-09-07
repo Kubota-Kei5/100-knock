@@ -25,7 +25,7 @@ Prismaスキーマファイル(`workspace/schema/schema.prisma`)に、以下の�
 
 ```bash
 # コンテナに接続
-docker-compose exec prisma-app bash
+docker-compose exec prisma-app sh
 
 # マイグレーション実行
 npx prisma migrate dev --name add-user-model
