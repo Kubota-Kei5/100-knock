@@ -1,0 +1,28 @@
+{
+  "name": "prisma-100knock",
+  "version": "1.0.0",
+  "description": "Prisma 100本ノック - 実践的なPrismaスキルを身につける演習問題集",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "ts-node",
+    "migrate": "npx prisma migrate dev",
+    "generate": "npx prisma generate",
+    "studio": "npx prisma studio",
+    "reset": "npx prisma migrate reset --force"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0",
+    "prisma": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "ts-node": {
+    "esm": false
+  }
+}

@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: prisma_100knock
+      POSTGRES_USER: prisma_user
+      POSTGRES_PASSWORD: prisma_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-data:/docker-entrypoint-initdb.d
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prisma_user -d prisma_100knock"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prisma-app:
+    build: .
+    environment:
+      DATABASE_URL: "postgresql://prisma_user:prisma_pass@postgres:5432/prisma_100knock"
+    volumes:
+      - ./workspace:/app/workspace
+      - ./prisma:/app/prisma
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: tail -f /dev/null
+
+volumes:
+  postgres_data:
