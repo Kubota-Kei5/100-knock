@@ -1,6 +1,7 @@
-const { PrismaClient } = require('@prisma/client')
+// TODO: PrismaClientをインポートしてください
+// ヒント: const { PrismaClient } = require('@prisma/client')
 
-const prisma = new PrismaClient()
+// TODO: PrismaClientのインスタンスを作成してください
 
 async function searchUsers() {
   try {
@@ -10,20 +11,27 @@ async function searchUsers() {
     // 検索対象のID配列
     const searchIds = [1, 2, 999]
 
-    for (const id of searchIds) {
+    // TODO: searchIds配列をループして、各IDのユーザーを検索してください
+    // ヒント1: for文またはfor...of文を使用
+    // ヒント2: prisma.user.findUnique({ where: { id: ... } }) を使用
+    // ヒント3: 見つかった場合とみつからない場合の処理を分ける
+    
+    for (/* ここにループ処理を実装 */) {
       console.log(`📍 ID: ${id}のユーザー`)
       
-      const user = await prisma.user.findUnique({
-        where: { id: id }
-      })
+      // TODO: findUniqueメソッドを使ってユーザーを検索
+      const user = /* ここを実装してください */
 
-      if (user) {
-        console.log(`名前: ${user.name}`)
-        console.log(`メール: ${user.email}`)
-        console.log(`年齢: ${user.age ? `${user.age}歳` : '不明'}`)
-        console.log(`作成日: ${user.createdAt.toLocaleString('ja-JP')}`)
+      // TODO: userが存在する場合の表示処理を実装
+      if (/* 条件を記述 */) {
+        // ユーザー情報を表示してください
+        // 表示項目: 名前、メール、年齢、作成日
+        // ヒント: user.age が null の場合は '不明' と表示
+        // ヒント: 作成日は user.createdAt.toLocaleString('ja-JP') で日本語形式にできます
+        
       } else {
-        console.log(`❌ ユーザーが見つかりません`)
+        // TODO: ユーザーが見つからない場合のメッセージを表示
+        
       }
       
       console.log() // 改行
@@ -32,10 +40,12 @@ async function searchUsers() {
     console.log('✅ 検索処理が完了しました！')
 
   } catch (error) {
-    console.error('❌ 検索中にエラーが発生しました:', error)
+    // TODO: エラーハンドリングを実装してください
+    
   } finally {
-    await prisma.$disconnect()
+    // TODO: Prismaクライアントの接続を終了してください
+    
   }
 }
 
-searchUsers()
+// TODO: searchUsers関数を実行してください
