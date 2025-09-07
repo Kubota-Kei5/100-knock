@@ -30,7 +30,7 @@ Prisma Clientを使用して、指定されたIDのUserレコードを検索・�
 
 ```bash
 # コンテナに接続
-docker-compose exec prisma-app bash
+docker-compose exec prisma-app sh
 
 # プログラム実行
 npx ts-node workspace/problems/problem-003.ts
