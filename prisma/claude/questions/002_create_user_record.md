@@ -32,9 +32,19 @@ Prisma Clientを使用して、新しいUserレコードをデータベースに
 # コンテナに接続
 docker-compose exec prisma-app sh
 
-# プログラム実行
-npx ts-node workspace/problems/problem-002.ts
+# データベースをリセット（重複実行時）
+npx prisma migrate reset --force
+
+# TypeScriptコンパイル・実行
+npx tsc workspace/problems/problem-002.ts --outDir ./temp
+node temp/problem-002.js
 ```
+
+### 💡 実行時のポイント
+
+- **初回実行**: そのまま実行できます
+- **2回目以降**: データベースリセットが必要（email重複のため）
+- **エラー時**: `npx prisma generate`でクライアント再生成
 
 ### 期待する出力
 

@@ -45,9 +45,20 @@ Prisma Clientを使用して、指定されたIDのUserレコードを検索・�
 # コンテナに接続
 docker-compose exec prisma-app sh
 
-# プログラム実行
-npx ts-node workspace/problems/problem-003.ts
+# 前提条件: 問題002のユーザーデータが必要
+# （まだ実行していない場合は問題002を先に完了してください）
+
+# TypeScriptコンパイル・実行
+npx tsc workspace/problems/problem-003.ts --outDir ./temp
+node temp/problem-003.js
 ```
+
+### 📋 前提条件
+
+この問題を実行する前に、**問題002でユーザーデータを作成**している必要があります：
+
+- 問題002を未実行の場合: 先に問題002を完了してください
+- データが空の場合: ID 1, 2が存在しないため検索結果が全て「見つかりません」になります
 
 ### 期待する出力
 
