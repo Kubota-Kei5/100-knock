@@ -47,13 +47,29 @@ docker-compose exec prisma-app sh
 5. **実行テスト**: コンパイル・実行して動作確認
 6. **解答比較**: `answers/xxx_answer.md`と`solutions/`で学習を深める
 
-## 📝 問題一覧（テスト版）
+## 📝 問題一覧
 
-| 問題番号 | タイトル | 学習内容 |
-|---------|----------|----------|
-| 001 | [基本的なUserモデルの定義](questions/001_basic_user_model.md) | Prismaスキーマの基本、マイグレーション |
-| 002 | [Userレコードの作成](questions/002_create_user_record.md) | Prisma Clientでのレコード作成 |
-| 003 | [IDによるユーザー検索](questions/003_find_user_by_id.md) | findUniqueメソッド、エラーハンドリング |
+### 🔰 基礎編（問題001-010）
+
+| 問題番号 | タイトル | 学習内容 | 実務危険度 |
+|---------|----------|----------|-----------|
+| 001 | [基本的なUserモデルの定義](questions/001_basic_user_model.md) | Prismaスキーマの基本、マイグレーション | ⭐ |
+| 002 | [Userレコードの作成](questions/002_create_user_record.md) | Prisma Clientでのレコード作成 | ⭐ |
+| 003 | [IDによるユーザー検索](questions/003_find_user_by_id.md) | findUniqueメソッド、エラーハンドリング | ⭐ |
+| 004 | [ユーザー情報の更新](questions/004_update_user_data.md) | updateメソッド、条件更新、エラーハンドリング | ⭐⭐ |
+| 005 | [ユーザーの削除](questions/005_delete_user_safely.md) | deleteメソッド、安全な削除手順 | ⭐⭐⭐ |
+| 006 | [Postモデルの追加](questions/006_add_post_relation.md) | リレーション定義、外部キー制約 | ⭐⭐ |
+| 007 | [リレーションデータの作成](questions/007_create_relation_data.md) | 関連データ作成、ネスト操作 | ⭐⭐⭐ |
+| 008 | [リレーションデータの検索](questions/008_query_relations.md) | include、select、N+1問題 | ⭐⭐⭐ |
+| 009 | [危険な削除操作の体験](questions/009_dangerous_cascade_delete.md) | CASCADE削除、依存関係、データ損失 | ⭐⭐⭐⭐⭐ |
+| 010 | [トランザクション処理](questions/010_transaction_processing.md) | トランザクション、データ整合性 | ⭐⭐⭐⭐⭐ |
+
+### 📈 学習進度の目安
+
+- **⭐**: 基本操作（安全）
+- **⭐⭐**: 実務レベル（注意必要）  
+- **⭐⭐⭐**: 重要スキル（慎重に）
+- **⭐⭐⭐⭐⭐**: 超重要（実務で事故多発）
 
 ## 💡 実行方法
 
@@ -62,12 +78,19 @@ docker-compose exec prisma-app sh
 TypeScriptファイルは以下の手順で実行してください：
 
 ```bash
-# 1. TypeScriptコンパイル
-npx tsc workspace/problems/problem-XXX.ts --outDir ./temp
+# 1. コンテナに接続
+docker-compose exec prisma-app sh
 
-# 2. JavaScript実行
+# 2. TypeScriptコンパイル・実行
+npx tsc workspace/problems/problem-XXX.ts --outDir ./temp
 node temp/problem-XXX.js
 ```
+
+### 📝 実行時の注意点
+
+- **データ重複エラー**: 同じ問題を複数回実行する場合は `npx prisma migrate reset --force` でリセット
+- **依存関係**: 問題003は問題002のデータが必要（順番に進めてください）
+- **コンパイルエラー**: TypeScriptエラーが出た場合は実装を見直してください
 
 ### よく使うコマンド
 
