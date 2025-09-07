@@ -25,6 +25,8 @@ services:
     volumes:
       - ./workspace:/app/workspace
       - ./prisma:/app/prisma
+    ports:
+      - "5556:5555"
     working_dir: /app
     depends_on:
       postgres:

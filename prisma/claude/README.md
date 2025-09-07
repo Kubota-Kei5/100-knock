@@ -60,6 +60,7 @@ npx prisma migrate dev --name your-migration-name
 npx prisma generate
 
 # Prisma Studio起動（ブラウザでDB確認）
+# コンテナ内で実行し、localhost:5556でアクセス
 npx prisma studio
 
 # データベースリセット
@@ -99,6 +100,7 @@ prisma/claude/
 ## 🐳 Docker環境詳細
 
 - **PostgreSQL**: ポート5433でアクセス可能
+- **Prisma Studio**: ポート5556でアクセス可能
 - **Node.js**: Alpine Linux + TypeScript + Prisma
 - **データ永続化**: `postgres_data`ボリュームでデータ保存
 

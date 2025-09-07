@@ -36,13 +36,16 @@ npx prisma generate
 
 ### 確認方法
 
-マイグレーション実行後、以下のコマンドでテーブルが正しく作成されたか確認できます：
+マイグレーション実行後、以下の手順でテーブルが正しく作成されたか確認できます：
 
 ```bash
+# コンテナ内でPrisma Studioを起動
 npx prisma studio
 ```
 
-ブラウザで http://localhost:5555 にアクセスしてPrisma Studioを開き、Userテーブルが表示されることを確認してください。
+ブラウザで http://localhost:5556 にアクセスしてPrisma Studioを開き、Userテーブルが表示されることを確認してください。
+
+**注意**: Prisma Studioはコンテナ内で起動し、ポート5556でホストからアクセスできます。
 
 ### ヒント
 
