@@ -1,34 +1,30 @@
-# 問題002: Userレコードの作成
+# 問題002: Userレコードの作成（穴埋め形式）
 
 ## 問題内容
 
-Prisma Clientを使用して、新しいUserレコードをデータベースに作成するプログラムを`workspace/problems/problem-002.ts`に作成してください。
+Prisma Clientを使用して、新しいUserレコードをデータベースに作成するプログラムを**自分で実装**してください。
 
-### 要件
+`workspace/problems/problem-002.ts`には穴埋め形式のテンプレートが用意されています。**TODOコメント部分を実装**して完成させてください。
 
-以下の条件を満たすUserを**3人**作成してください：
+### 📝 実装が必要な箇所
 
-1. **田中太郎（Taro Tanaka）**
-   - email: "taro@example.com"
-   - name: "田中太郎"
-   - age: 25
+1. **データオブジェクトの作成** - `prisma.user.create()`の`data`部分
+2. **createメソッドの完全実装** - 佐藤花子と鈴木次郎の作成コード
+3. **エラーハンドリング** - try-catchのfinally句
+4. **関数実行** - 最後の関数呼び出し
 
-2. **佐藤花子（Hanako Sato）**
-   - email: "hanako@example.com"  
-   - name: "佐藤花子"
-   - age: 30
+### 🎯 作成する3人のUser
 
-3. **鈴木次郎（Jiro Suzuki）**
-   - email: "jiro@example.com"
-   - name: "鈴木次郎"
-   - age: null（年齢不明）
+1. **田中太郎** - email: "taro@example.com", name: "田中太郎", age: 25
+2. **佐藤花子** - email: "hanako@example.com", name: "佐藤花子", age: 30  
+3. **鈴木次郎** - email: "jiro@example.com", name: "鈴木次郎", age: null
 
 ### 作業手順
 
 1. 問題001でUserモデルとマイグレーションが完了していることを確認
-2. `workspace/problems/problem-002.ts`ファイルを作成
-3. Prisma Clientを使用して上記のUserレコードを作成するコードを記述
-4. 作成したプログラムを実行して動作確認
+2. `workspace/problems/problem-002.ts`のTODOコメント部分を実装
+3. 実装したプログラムをコンパイル・実行して動作確認
+4. 必要に応じて`solutions/client-code/002_solution.ts`と比較
 
 ### 実行コマンド
 
