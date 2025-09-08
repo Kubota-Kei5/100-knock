@@ -10,7 +10,7 @@ async function updateUsers() {
     console.log("📝 タスク1: 田中太郎の年齢更新");
 
     // TODO: prisma.user.update()を使って田中太郎の年齢を26に更新してください
-    const updatedTaro = prisma.user.update({
+    const updatedTaro = await prisma.user.update({
       where: { id: 1 },
       data: {
         age: 26,
@@ -45,6 +45,12 @@ async function updateUsers() {
     // 存在しない場合は作成、存在する場合は更新
     const yamada = await prisma.user.upsert({
       where: {
+        email: "yamada@example.com",
+      },
+      update: {
+        age: 28,
+      },
+      create: {
         email: "yamada@example.com",
         name: "山田花子",
         age: 28,
