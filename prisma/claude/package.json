@@ -7,7 +7,7 @@
     "dev": "ts-node",
     "migrate": "npx prisma migrate dev",
     "generate": "npx prisma generate",
-    "studio": "npx prisma studio",
+    "studio": "pkill -f 'prisma studio' 2>/dev/null || true && npx prisma studio --port 5555",
     "reset": "npx prisma migrate reset --force"
   },
   "dependencies": {
