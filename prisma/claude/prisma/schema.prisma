@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ここに学習者がモデルを定義していきます
 model User {
   id        Int       @id @default(autoincrement())
   email     String    @unique
@@ -14,4 +18,16 @@ model User {
   age       Int?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  posts     Post[]
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+  title String
+  content String?
+  published Boolean @default(false)
+  authorId Int
+  author User @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime
 }
