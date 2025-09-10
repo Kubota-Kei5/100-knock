@@ -106,7 +106,7 @@ npx prisma generate
 
 # Prisma Studio起動（ブラウザでDB確認）
 # コンテナ内で実行し、localhost:5556でアクセス
-npm run studio
+npx prisma studio
 
 # データベースリセット
 npx prisma migrate reset --force
