@@ -9,201 +9,189 @@ const { PrismaClient } = require('@prisma/client')
 
 const prisma = new PrismaClient()
 
-async function queryRelations() {
+async function queryRelationData() {
   try {
-    console.log('🔍 関連データのクエリを開始します...\n')
+    console.log('🔍 リレーションデータの検索を開始します...\n')
 
-    // タスク1: ユーザーとその投稿を一緒に取得
-    console.log('📋 タスク1: ユーザーとその投稿を一緒に取得')
+    // タスク1: includeを使った関連データ取得
+    console.log('📋 タスク1: includeを使った全取得')
     
+    // TODO: 全ユーザーとその投稿を取得してください
     const usersWithPosts = await prisma.user.findMany({
       include: {
-        posts: {
-          select: {
-            id: true,
-            title: true,
-            published: true,
-            createdAt: true
-          }
-        }
-      },
-      orderBy: {
-        name: 'asc'
+        posts: true
       }
     })
     
     usersWithPosts.forEach(user => {
-      console.log(`\n👤 ${user.name} (${user.posts.length}件の投稿)`)
+      console.log(`ユーザー: ${user.name}`)
+      // TODO: user.postsをループして投稿を表示してください
       user.posts.forEach(post => {
-        const status = post.published ? '✅' : '📝'
-        console.log(`   ${status} ${post.title}`)
+        console.log(`  - ${post.title}`)
       })
     })
 
-    // タスク2: 特定の投稿と作者情報を取得
-    console.log('\n📖 タスク2: 投稿一覧と作者情報')
+    // タスク2: selectを使った必要データのみ取得
+    console.log('\n📋 タスク2: selectを使った必要データのみ取得')
     
-    const postsWithAuthor = await prisma.post.findMany({
-      include: {
-        author: {
+    // TODO: ユーザー名と投稿タイトルのみを取得してください
+    const selectedData = await prisma.user.findMany({
+      select: {
+        name: true,
+        posts: {
           select: {
-            name: true,
-            email: true
+            title: true
           }
         }
-      },
-      where: {
-        published: true  // 公開投稿のみ
-      },
-      orderBy: {
-        createdAt: 'desc'
       }
     })
     
-    console.log('\n=== 公開投稿一覧 ===')
-    postsWithAuthor.forEach((post, index) => {
-      console.log(`${index + 1}. ${post.title}`)
-      console.log(`   作者: ${post.author.name}`)
-      console.log(`   作成: ${post.createdAt.toLocaleDateString('ja-JP')}\n`)
+    selectedData.forEach(user => {
+      // TODO: ユーザー名と投稿タイトルを表示してください
+      user.posts.forEach(post => {
+        console.log(`${user.name}: ${post.title}`)
+      })
     })
 
-    // タスク3: 条件付きの関連データ取得
-    console.log('📋 タスク3: 条件付きの関連データ取得')
+    // タスク3: ネストした条件での検索（公開済み投稿があるユーザー）
+    console.log('\n📋 タスク3: 公開済み投稿があるユーザーのみ')
     
-    // 投稿数が2件以上のユーザーのみ取得
+    // TODO: published: true の投稿があるユーザーを検索してください
+    const usersWithPublishedPosts = await prisma.user.findMany({
+      where: {
+        posts: {
+          some: { published: true }
+        }
+      }
+    })
+    
+    usersWithPublishedPosts.forEach(user => {
+      console.log(`${user.name}: 公開済み投稿があります`)
+    })
+
+    // タスク4: 集約関数を使った検索（投稿数）
+    console.log('\n📋 タスク4: 投稿数の集約')
+    
+    // TODO: 各ユーザーの投稿数を取得してください
+    const usersWithCount = await prisma.user.findMany({
+      include: {
+        _count: {
+          select: { posts: true }
+        }
+      }
+    })
+    
+    usersWithCount.forEach(user => {
+      console.log(`${user.name}: ${user._count.posts}件の投稿`)
+    })
+
+    // タスク5: N+1問題の体験と解決
+    console.log('\n⚠️ タスク5: N+1問題の比較')
+    
+    // 非効率な方法（N+1問題）
+    console.time('非効率な方法')
+    // TODO: まずユーザー一覧を取得してください
+    const users = await prisma.user.findMany()
+    
+    let inefficientQueryCount = 1 // 最初のユーザー取得で1回
+    
+    // TODO: 各ユーザーの投稿を個別に取得してください（ループ内でクエリ）
+    for (const user of users) {
+      const posts = await prisma.post.findMany({
+        where: { authorId: user.id }
+      })
+      inefficientQueryCount++
+    }
+    console.timeEnd('非効率な方法')
+    console.log(`非効率な方法: ${inefficientQueryCount}回のクエリを実行`)
+
+    // 効率的な方法（JOIN）
+    console.time('効率的な方法')
+    // TODO: includeを使って1回で全データを取得してください
+    const efficientData = await prisma.user.findMany({
+      include: {
+        posts: true
+      }
+    })
+    console.timeEnd('効率的な方法')
+    console.log(`効率的な方法: 1回のクエリで完了`)
+
+    console.log('\n🎉 リレーション検索が完了しました！')
+
+    // 追加タスク: 複雑な検索の例
+    console.log('\n📋 追加: 複雑な検索の例')
+    
+    // TODO: 投稿数が3件以上のユーザーを検索してください
+    // ヒント: having句相当の処理
     const activeUsers = await prisma.user.findMany({
       where: {
         posts: {
-          some: {}  // 投稿を持つユーザー
+          some: {} // 投稿を持つユーザー
         }
       },
       include: {
-        posts: {
-          where: {
-            published: true  // 公開投稿のみ
-          },
-          select: {
-            title: true,
-            createdAt: true
-          }
-        }
-      }
-    })
-    
-    console.log('\n=== 投稿を持つユーザー（公開投稿のみ表示）===')
-    activeUsers.forEach(user => {
-      if (user.posts.length > 0) {
-        console.log(`\n📝 ${user.name} (公開投稿: ${user.posts.length}件)`)
-        user.posts.forEach(post => {
-          console.log(`   - ${post.title}`)
-        })
-      }
-    })
-
-    // タスク4: 複雑な条件での関連クエリ
-    console.log('\n📊 タスク4: 複雑な条件での関連クエリ')
-    
-    // 最近1週間以内に投稿したユーザー
-    const oneWeekAgo = new Date()
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-    
-    const recentActiveUsers = await prisma.user.findMany({
-      where: {
-        posts: {
-          some: {
-            createdAt: {
-              gte: oneWeekAgo
-            }
-          }
-        }
-      },
-      include: {
-        posts: {
-          where: {
-            createdAt: {
-              gte: oneWeekAgo
-            }
-          },
-          select: {
-            title: true,
-            createdAt: true
-          },
-          orderBy: {
-            createdAt: 'desc'
-          }
-        }
-      }
-    })
-    
-    console.log('\n=== 最近アクティブなユーザー ===')
-    recentActiveUsers.forEach(user => {
-      console.log(`\n🔥 ${user.name}`)
-      user.posts.forEach(post => {
-        const daysAgo = Math.floor((Date.now() - post.createdAt.getTime()) / (1000 * 60 * 60 * 24))
-        console.log(`   - ${post.title} (${daysAgo}日前)`)
-      })
-    })
-
-    // タスク5: 集計データの取得
-    console.log('\n📈 タスク5: 集計データの取得')
-    
-    // ユーザー毎の投稿数統計
-    const userStats = await prisma.user.findMany({
-      select: {
-        name: true,
         _count: {
-          select: {
-            posts: true
-          }
-        },
-        posts: {
-          select: {
-            published: true
-          }
+          select: { posts: true }
         }
       }
     })
     
-    console.log('\n=== ユーザー投稿統計 ===')
-    userStats.forEach(user => {
-      const publishedCount = user.posts.filter(post => post.published).length
-      const draftCount = user.posts.length - publishedCount
-      
-      console.log(`📊 ${user.name}:`)
-      console.log(`   総投稿数: ${user._count.posts}件`)
-      console.log(`   公開投稿: ${publishedCount}件`)
-      console.log(`   下書き: ${draftCount}件`)
+    const usersWithManyPosts = activeUsers.filter(user => user._count.posts >= 3)
+    console.log('投稿数が3件以上のユーザー:')
+    usersWithManyPosts.forEach(user => {
+      console.log(`  ${user.name}: ${user._count.posts}件`)
     })
-
-    // 全体統計
-    const totalUsers = await prisma.user.count()
-    const totalPosts = await prisma.post.count()
-    const publishedPosts = await prisma.post.count({ where: { published: true } })
-    const usersWithPosts = await prisma.user.count({
+    
+    // TODO: 最新の投稿から5件を著者情報付きで取得してください
+    // ヒント: orderBy + take
+    const latestPosts = await prisma.post.findMany({
+      include: {
+        author: {
+          select: { name: true }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 5
+    })
+    
+    console.log('\n最新の投稿5件:')
+    latestPosts.forEach((post, index) => {
+      console.log(`${index + 1}. ${post.title} - ${post.author.name}`)
+    })
+    
+    // TODO: 特定の文字列を含む投稿を検索してください
+    // ヒント: contains
+    const searchTerm = 'Prisma'
+    const postsWithTerm = await prisma.post.findMany({
       where: {
-        posts: {
-          some: {}
+        title: {
+          contains: searchTerm
+        }
+      },
+      include: {
+        author: {
+          select: { name: true }
         }
       }
     })
     
-    console.log('\n=== システム全体統計 ===')
-    console.log(`総ユーザー数: ${totalUsers}人`)
-    console.log(`投稿を持つユーザー: ${usersWithPosts}人`)
-    console.log(`総投稿数: ${totalPosts}件`)
-    console.log(`公開投稿: ${publishedPosts}件`)
-    console.log(`下書き投稿: ${totalPosts - publishedPosts}件`)
-
-    console.log('\n🎉 関連データクエリが完了しました！')
+    console.log(`\n"${searchTerm}"を含む投稿:`)
+    postsWithTerm.forEach(post => {
+      console.log(`  ${post.title} - ${post.author.name}`)
+    })
 
   } catch (error) {
-    console.error('❌ クエリ実行中にエラーが発生しました:', error)
+    console.error('❌ リレーション検索中にエラーが発生しました:', error)
   } finally {
+    // TODO: Prismaクライアントを切断してください
     await prisma.$disconnect()
   }
 }
 
-queryRelations()
+// TODO: queryRelationData関数を実行してください
+queryRelationData()
 ```
 
 ## 解説
@@ -221,13 +209,12 @@ queryRelations()
 
 2. **select による必要フィールドの絞り込み**
    ```typescript
-   const users = await prisma.user.findMany({
-     include: {
+   const selectedData = await prisma.user.findMany({
+     select: {
+       name: true,
        posts: {
          select: {
-           id: true,
-           title: true,
-           published: true  // 必要なフィールドのみ選択
+           title: true  // 必要なフィールドのみ選択
          }
        }
      }
@@ -236,14 +223,39 @@ queryRelations()
 
 3. **関連データに対する条件指定**
    ```typescript
-   const activeUsers = await prisma.user.findMany({
+   const usersWithPublishedPosts = await prisma.user.findMany({
      where: {
        posts: {
-         some: {            // 少なくとも1つの投稿がある
-           published: true  // 公開投稿を持つユーザー
-         }
+         some: { published: true }  // 公開投稿を持つユーザー
        }
      }
+   })
+   ```
+
+4. **集約関数の使用**
+   ```typescript
+   const usersWithCount = await prisma.user.findMany({
+     include: {
+       _count: {
+         select: { posts: true }  // 投稿数を取得
+       }
+     }
+   })
+   ```
+
+5. **N+1問題の解決**
+   ```typescript
+   // ❌ N+1問題（非効率）
+   const users = await prisma.user.findMany()
+   for (const user of users) {
+     const posts = await prisma.post.findMany({
+       where: { authorId: user.id }
+     })
+   }
+   
+   // ✅ 効率的（JOIN）
+   const efficientData = await prisma.user.findMany({
+     include: { posts: true }
    })
    ```
 
@@ -268,17 +280,18 @@ const users = await prisma.user.findMany({
   }
 })
 
-// パターン2: ページネーション付きクエリ
-const posts = await prisma.post.findMany({
-  include: {
-    author: {
-      select: { name: true }
+// パターン2: 複数条件の組み合わせ
+const activeUsers = await prisma.user.findMany({
+  where: {
+    posts: {
+      some: {
+        AND: [
+          { published: true },
+          { createdAt: { gte: new Date('2024-01-01') } }
+        ]
+      }
     }
-  },
-  where: { published: true },
-  orderBy: { createdAt: 'desc' },
-  take: 20,    // 20件取得
-  skip: page * 20  // ページネーション
+  }
 })
 
 // パターン3: 集計クエリ
@@ -321,140 +334,35 @@ const allData = await prisma.post.findMany({
 })
 ```
 
-### 高度なクエリテクニック
-
-```typescript
-// 1. 複数階層の関連データ取得
-const posts = await prisma.post.findMany({
-  include: {
-    author: {
-      include: {
-        posts: {
-          select: { title: true },
-          take: 3  // 作者の他の投稿3件
-        }
-      }
-    }
-  }
-})
-
-// 2. 条件の組み合わせ
-const complexQuery = await prisma.user.findMany({
-  where: {
-    AND: [
-      { age: { gte: 20 } },
-      {
-        posts: {
-          some: {
-            AND: [
-              { published: true },
-              { createdAt: { gte: new Date('2024-01-01') } }
-            ]
-          }
-        }
-      }
-    ]
-  }
-})
-
-// 3. 集計関数の活用
-const userStats = await prisma.user.findMany({
-  select: {
-    name: true,
-    posts: {
-      select: {
-        createdAt: true
-      }
-    },
-    _count: {
-      select: {
-        posts: {
-          where: { published: true }
-        }
-      }
-    }
-  }
-})
-
-// 4. グループ化クエリ（Raw SQL使用）
-const monthlyStats = await prisma.$queryRaw`
-  SELECT 
-    DATE_TRUNC('month', "createdAt") as month,
-    COUNT(*) as post_count
-  FROM "Post"
-  WHERE "published" = true
-  GROUP BY month
-  ORDER BY month DESC
-`
-```
-
-### パフォーマンス最適化
-
-```typescript
-// 1. 必要最小限のフィールド取得
-const optimizedQuery = await prisma.post.findMany({
-  select: {
-    id: true,
-    title: true,
-    author: {
-      select: {
-        name: true  // 作者名のみ
-      }
-    }
-  },
-  take: 10  // 必要な件数のみ
-})
-
-// 2. インデックスを活用した検索
-const indexedQuery = await prisma.post.findMany({
-  where: {
-    authorId: 1,      // インデックス付きフィールド
-    published: true   // インデックス付きフィールド
-  },
-  orderBy: {
-    createdAt: 'desc'  // インデックス付きフィールド
-  }
-})
-
-// 3. カウントクエリの最適化
-const count = await prisma.post.count({
-  where: { published: true }
-})
-// findMany + length より効率的
-```
-
 ### 実行結果例
 
 ```
-🔍 関連データのクエリを開始します...
+🔍 リレーションデータの検索を開始します...
 
-📋 タスク1: ユーザーとその投稿を一緒に取得
+📋 タスク1: includeを使った全取得
+ユーザー: 田中太郎
+  - はじめての投稿
+  - Prismaについて
+ユーザー: 佐藤次郎
+  - 自己紹介
 
-👤 田中太郎 (3件の投稿)
-   ✅ 関連データの作成方法
-   ✅ データベース設計のコツ
+📋 タスク2: selectを使った必要データのみ取得
+田中太郎: はじめての投稿
+田中太郎: Prismaについて
+佐藤次郎: 自己紹介
 
-👤 佐藤次郎 (2件の投稿)
-   ✅ Prisma入門
-   📝 TypeScriptとPrisma
+📋 タスク3: 公開済み投稿があるユーザーのみ
+田中太郎: 公開済み投稿があります
 
-📖 タスク2: 投稿一覧と作者情報
+📋 タスク4: 投稿数の集約
+田中太郎: 2件の投稿
+佐藤次郎: 1件の投稿
 
-=== 公開投稿一覧 ===
-1. 複雑な関連データの作成
-   作者: 山田三郎
-   作成: 2024/1/15
+⚠️ タスク5: N+1問題の比較
+非効率な方法: 3回のクエリを実行
+効率的な方法: 1回のクエリで完了
 
-2. 関連データの作成方法
-   作者: 田中太郎
-   作成: 2024/1/15
-
-=== システム全体統計 ===
-総ユーザー数: 5人
-投稿を持つユーザー: 3人
-総投稿数: 8件
-公開投稿: 5件
-下書き投稿: 3件
+🎉 リレーション検索が完了しました！
 ```
 
 ## 学習のポイント
