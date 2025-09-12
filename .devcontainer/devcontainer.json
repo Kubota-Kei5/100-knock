@@ -1,0 +1,36 @@
+{
+  "name": "Prisma 100-knock Development",
+  "dockerComposeFile": "../prisma/claude/docker-compose.yaml",
+  "service": "prisma-app",
+  "workspaceFolder": "/app",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Prisma.prisma",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "files.watcherExclude": {
+          "**/node_modules/**": true
+        }
+      }
+    }
+  },
+
+  "remoteUser": "root",
+  "postCreateCommand": "npm install",
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/prisma/claude/prisma,target=/app/prisma,type=bind",
+    "source=${localWorkspaceFolder}/prisma/claude/workspace,target=/app/workspace,type=bind"
+  ],
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  }
+}
