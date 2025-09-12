@@ -53,11 +53,7 @@ async function dangerousDeleteOperations() {
     // TODO: まず田中太郎の投稿をすべて削除してください
     const taro = await prisma.user.findUnique({
       where: {
-        name: "田中太郎",
-      },
-      select: {
-        id: true,
-        name: true,
+        email: "taro@example.com",
       },
     });
     const deletedTaroPosts = await prisma.post.deleteMany({
@@ -88,7 +84,7 @@ async function dangerousDeleteOperations() {
     try {
       const jiro = await prisma.user.findUnique({
         where: {
-          name: "佐藤次郎",
+          email: "sato@example.com",
         },
       });
 
@@ -153,7 +149,7 @@ async function dangerousDeleteOperations() {
     // TODO: 削除されたユーザー（田中太郎）を検索してみてください
     const deletedTaro = await prisma.user.findUnique({
       where: {
-        name: "田中太郎",
+        email: "taro@example.com",
       },
     });
 
