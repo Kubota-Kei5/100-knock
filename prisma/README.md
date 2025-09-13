@@ -7,7 +7,7 @@
 ### 1. 環境起動
 
 ```bash
-cd prisma/claude
+cd prisma
 docker-compose up --build -d
 ```
 
