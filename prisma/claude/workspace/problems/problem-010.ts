@@ -122,11 +122,12 @@ async function transactionProcessing() {
     // 1. 山田花子の投稿をすべて削除
     // 2. 山田花子を削除
     // 3. 全体の投稿数を再カウントして統計更新
+
     const deleteResult = await prisma.$transaction(async (prisma) => {
       // まず対象ユーザーを検索
       const targetUser = await prisma.user.findUnique({
         where: {
-          email: "yamada@example.com",
+          email: "taro@example.com",
         },
       });
 
@@ -169,9 +170,11 @@ async function transactionProcessing() {
     console.log("\n📋 タスク5: 並行処理での整合性");
 
     // TODO: 同時に複数のカウンター操作を実行してください
-    // 現在の田中太郎のage（投稿数カウンター）を取得
-    const currentUser = await prisma.user.findUnique({ where: { id: 1 } });
-    const currentCount = currentUser?.age || 0;
+    // 現在のage（投稿数カウンター）を取得
+    const currentUser = await prisma.user.findUnique({
+      where: { email: "yui@example.com" },
+    });
+    const currentCount = currentUser.age;
 
     console.log(`現在のカウンター値: ${currentCount}`);
 
@@ -180,12 +183,15 @@ async function transactionProcessing() {
     for (let i = 0; i < 3; i++) {
       promises.push(
         prisma.$transaction(async (prisma) => {
-          const user = await prisma.user.findUnique({ where: { id: 1 } });
-          const newCount = (user?.age || 0) + 1;
-          return prisma.user.update({
-            where: { id: 1 },
-            data: { age: newCount },
+          await prisma.user.update({
+            where: { email: "yui@example.com" },
+            data: { age: { increment: 1 } },
           });
+          console.log(`  → 並行処理 ${i + 1} 完了`);
+          const user = await prisma.user.findUnique({
+            where: { email: "yui@example.com" },
+          });
+          console.log({ userAge: user.age });
         })
       );
     }
@@ -194,12 +200,14 @@ async function transactionProcessing() {
     await Promise.all(promises);
 
     // 最終結果確認
-    const finalUser = await prisma.user.findUnique({ where: { id: 1 } });
+    const finalUser = await prisma.user.findUnique({
+      where: { email: "yui@example.com" },
+    });
     console.log(`✅ 並行処理完了`);
-    console.log(`  → 最終カウンター値: ${finalUser?.age}`);
+    console.log(`  → 最終カウンター値: ${finalUser.age}`);
     console.log(
       `  → 期待値との比較: ${
-        finalUser?.age === currentCount + 3 ? "正確" : "不正確"
+        finalUser.age === currentCount + 3 ? "正確" : "不正確"
       }`
     );
 
