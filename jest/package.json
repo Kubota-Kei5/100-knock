@@ -1,0 +1,27 @@
+{
+  "name": "jest-practice",
+  "version": "1.0.0",
+  "description": "Jest学習用リポジトリ - フロントエンド（React+TypeScript）とバックエンド（Express+TypeScript）のテスト実習",
+  "scripts": {
+    "frontend:install": "cd workspace/frontend && npm install",
+    "backend:install": "cd workspace/backend && npm install",
+    "frontend:test": "cd workspace/frontend && npm test",
+    "backend:test": "cd workspace/backend && npm test",
+    "frontend:dev": "cd workspace/frontend && npm start",
+    "backend:dev": "cd workspace/backend && npm run dev",
+    "install:all": "npm run frontend:install && npm run backend:install",
+    "test:all": "npm run frontend:test && npm run backend:test"
+  },
+  "keywords": [
+    "jest",
+    "testing",
+    "react",
+    "express",
+    "typescript",
+    "frontend",
+    "backend",
+    "practice"
+  ],
+  "author": "",
+  "license": "MIT"
+}
