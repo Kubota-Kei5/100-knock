@@ -1,16 +1,5 @@
 import { jest } from "@jest/globals";
-import { Logger } from "./NotificationService";
-
-interface HttpClient {
-  get<T>(url: string): Promise<T>;
-  post<T>(url: string, data: any): Promise<T>;
-}
-
-interface CacheService {
-  get(key: string): any;
-  set(key: string, value: any, ttl?: number): void;
-  delete(key: string): void;
-}
+import { Logger, HttpClient, CacheService } from "./types/service";
 
 export class DataService {
   constructor(
