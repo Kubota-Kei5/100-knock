@@ -1,5 +1,5 @@
+import { describe, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
 import { DataProcessor } from "../DataProcessor";
-import { describe, it } from "@jest/globals";
 
 describe("DataProcessorクラス", () => {
   // モックタイマーを利用したテスト

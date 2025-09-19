@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, it, expect, test } from "@jest/globals";
 import { add, subtract, multiply, divide } from "../math";
 
 describe("四則演算関数のテスト", () => {
