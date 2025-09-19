@@ -1,16 +1,4 @@
-// 外部依存（メール送信、SMS送信）
-interface EmailService {
-  sendEmail(to: string, subject: string, body: string): Promise<boolean>;
-}
-
-interface SmsService {
-  sendSms(phoneNumber: string, message: string): Promise<boolean>;
-}
-
-export interface Logger {
-  info(message: string): void;
-  error(message: string, error?: Error): void;
-}
+import { EmailService, SmsService, Logger } from "@/types/service";
 
 // テスト対象のクラス
 export class NotificationService {

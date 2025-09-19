@@ -1,66 +1,148 @@
-import { jest } from "@jest/globals";
-import { Logger } from "../NotificationService";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from "@jest/globals";
+import { DataService } from "@/DataService";
+import { HttpClient, CacheService, Logger } from "@/types/service";
 
-interface HttpClient {
-  get<T>(url: string): Promise<T>;
-  post<T>(url: string, data: any): Promise<T>;
-}
+describe("DataServiceクラス", () => {
+  let dataService: DataService;
+  let mockHttpClient: jest.Mocked<HttpClient>;
+  let mockCache: jest.Mocked<CacheService>;
+  let mockLogger: jest.Mocked<Logger>;
 
-interface CacheService {
-  get(key: string): any;
-  set(key: string, value: any, ttl?: number): void;
-  delete(key: string): void;
-}
+  beforeEach(() => {
+    mockHttpClient = {
+      get: jest.fn() as jest.MockedFunction<HttpClient["get"]>,
+      post: jest.fn() as jest.MockedFunction<HttpClient["post"]>,
+    };
 
-export class DataService {
-  constructor(
-    private httpClient: HttpClient,
-    private cache: CacheService,
-    private logger: Logger
-  ) {}
+    mockCache = {
+      get: jest.fn() as jest.MockedFunction<CacheService["get"]>,
+      set: jest.fn() as jest.MockedFunction<CacheService["set"]>,
+      delete: jest.fn() as jest.MockedFunction<CacheService["delete"]>,
+    };
 
-  async getUserData(userId: number): Promise<any> {
+    mockLogger = {
+      info: jest.fn() as jest.MockedFunction<Logger["info"]>,
+      error: jest.fn() as jest.MockedFunction<Logger["error"]>,
+    };
+
+    dataService = new DataService(mockHttpClient, mockCache, mockLogger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("getUserData メソッド", () => {
+    const userId = 123;
     const cacheKey = `user:${userId}`;
+    const userData = { id: userId, name: "John", email: "john@example.com" };
 
-    // キャッシュをチェック
-    const cachedData = this.cache.get(cacheKey);
-    if (cachedData) {
-      this.logger.info(`User data found in cache for user ${userId}`);
-      return cachedData;
-    }
+    it("キャッシュにデータがある場合はキャッシュから返す", async () => {
+      // Arrange: キャッシュにデータがある状態をモック
+      mockCache.get.mockReturnValue(userData);
 
-    // APIから取得
-    try {
-      this.logger.info(`Fetching user data from API for user ${userId}`);
-      const userData = await this.httpClient.get(`/users/${userId}`);
+      // Act
+      const result = await dataService.getUserData(userId);
 
-      // キャッシュに保存（5分間）
-      this.cache.set(cacheKey, userData, 300);
-      return userData;
-    } catch (error) {
-      this.logger.error(
+      // Assert
+      expect(result).toEqual(userData);
+      expect(mockCache.get).toHaveBeenCalledWith(cacheKey);
+      expect(mockHttpClient.get).not.toHaveBeenCalled(); // API呼び出しなし
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `User data found in cache for user ${userId}`
+      );
+    });
+
+    it("キャッシュにない場合はAPIから取得してキャッシュに保存", async () => {
+      // Arrange: キャッシュにデータがない状態をモック
+      mockCache.get.mockReturnValue(null);
+      mockHttpClient.get.mockResolvedValue(userData);
+
+      // Act
+      const result = await dataService.getUserData(userId);
+
+      // Assert
+      expect(result).toEqual(userData);
+      expect(mockCache.get).toHaveBeenCalledWith(cacheKey);
+      expect(mockHttpClient.get).toHaveBeenCalledWith(`/users/${userId}`);
+      expect(mockCache.set).toHaveBeenCalledWith(cacheKey, userData, 300);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Fetching user data from API for user ${userId}`
+      );
+    });
+
+    it("API呼び出し失敗時はエラーを再スローする", async () => {
+      const apiError = new Error("API Error");
+      mockCache.get.mockReturnValue(null);
+      mockHttpClient.get.mockRejectedValue(apiError);
+
+      await expect(dataService.getUserData(userId)).rejects.toThrow(
+        "API Error"
+      );
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
         `Failed to fetch user data for user ${userId}`,
-        error as Error
+        apiError
       );
-      throw error;
-    }
-  }
+      expect(mockCache.set).not.toHaveBeenCalled(); // キャッシュ保存なし
+    });
+  });
 
-  async updateUserProfile(userId: number, profileData: any): Promise<boolean> {
-    try {
-      await this.httpClient.post(`/users/${userId}/profile`, profileData);
+  describe("updateUserProfile メソッド", () => {
+    const userId = 123;
+    const profileData = { bio: "Updated bio", website: "https://example.com" };
 
-      // キャッシュを無効化
-      this.cache.delete(`user:${userId}`);
+    it("プロフィール更新後にキャッシュを削除する", async () => {
+      mockHttpClient.post.mockResolvedValue({ success: true });
 
-      this.logger.info(`User profile updated for user ${userId}`);
-      return true;
-    } catch (error) {
-      this.logger.error(
+      const result = await dataService.updateUserProfile(userId, profileData);
+
+      expect(result).toBe(true);
+      expect(mockHttpClient.post).toHaveBeenCalledWith(
+        `/users/${userId}/profile`,
+        profileData
+      );
+      expect(mockCache.delete).toHaveBeenCalledWith(`user:${userId}`);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `User profile updated for user ${userId}`
+      );
+    });
+
+    it("更新失敗時はfalseを返す", async () => {
+      const updateError = new Error("Update failed");
+      mockHttpClient.post.mockRejectedValue(updateError);
+
+      const result = await dataService.updateUserProfile(userId, profileData);
+
+      expect(result).toBe(false);
+      expect(mockCache.delete).not.toHaveBeenCalled(); // キャッシュ削除なし
+      expect(mockLogger.error).toHaveBeenCalledWith(
         `Failed to update user profile for user ${userId}`,
-        error as Error
+        updateError
       );
-      return false;
-    }
-  }
-}
+    });
+  });
+});
+
+describe("基本的なモック", () => {
+  it("jest.fn()でモック関数を作成", () => {
+    const mockFunction = jest.fn();
+
+    // 戻り値を設定
+    mockFunction.mockReturnValue("test value");
+
+    // 呼び出し
+    const result = mockFunction();
+
+    // 検証
+    expect(result).toBe("test value");
+    expect(mockFunction).toHaveBeenCalledTimes(1);
+  });
+});
